@@ -15,11 +15,12 @@
  */
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 	private static Scanner in = new Scanner(System.in);
-	private ArrayList<User> users = new ArrayList<User>();
+	private List<User> users = new ArrayList<User>();
 	
 	public static void main(String[] args) {
 		new Main();
@@ -44,12 +45,12 @@ public class Main {
 			System.out.println("User #" + n + ": " + (n > 2 ? " (press enter again to match games)" : ""));
 			username = in.nextLine();
 			if (username.isEmpty()) break;
-			users.add(new User(username, SteamHandler.getGames(username)));
+			users.add(new User(username, SteamHandler.getUserGames(username)));
 		} while (users.size() < 2 || !username.isEmpty());
 	}
 	
-	private ArrayList<String> matchGames() {
-		ArrayList<String> matchedGames = new ArrayList<String>();
+	private List<String> matchGames() {
+		List<String> matchedGames = new ArrayList<String>();
 		for (User user : users) {
 			if (matchedGames.isEmpty()) {
 				matchedGames.addAll(user.getGames());
@@ -58,6 +59,10 @@ public class Main {
 					if (!user.getGames().contains(matchedGames.get(i))) matchedGames.remove(i);
 				}
 			}
+		}
+		List<String> searchGames = SteamHandler.getSearchGames();
+		for (int i = matchedGames.size() - 1; i >= 0; i--) {
+			if (!searchGames.contains(matchedGames.get(i))) matchedGames.remove(i);
 		}
 		return matchedGames;
 	}

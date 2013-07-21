@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class User {
 	private String name;
-	private ArrayList<String> games;
+	private List<String> games;
 	
-	User(String name, ArrayList<String> games) {
+	User(String name, List<String> games) {
 		this.name = name;
 		this.games = games;
 	}
@@ -29,7 +29,7 @@ public class User {
 		return name;
 	}
 	
-	ArrayList<String> getGames() {
+	List<String> getGames() {
 		return games;
 	}
 }

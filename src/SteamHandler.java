@@ -18,19 +18,19 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SteamHandler {
-	static ArrayList<String> getGames(String username) {
-		return parseGames(downloadGameList(username));
+	static List<String> getUserGames(String username) {
+		return parseGames(downloadUserGames(username));
 	}
 	
-	private static String downloadGameList(String username) {
+	private static String downloadUserGames(String username) {
 		StringBuffer strbuff = new StringBuffer();
 		try {
-			URLConnection conn = new URL("http://steamcommunity.com/id/" + username + "/games?tab=all&sort=name").openConnection();
-			InputStream input = new BufferedInputStream(conn.getInputStream());
+			URL url = new URL("http://steamcommunity.com/id/" + username + "/games?tab=all&sort=name");
+			InputStream input = new BufferedInputStream(url.openConnection().getInputStream());
 			byte data[] = new byte[1024];
 			int count;
 			while ((count = input.read(data)) != -1) {
@@ -43,12 +43,100 @@ public class SteamHandler {
 		return strbuff.toString().replaceAll("\r\n", "\n");
 	}
 	
-	private static ArrayList<String> parseGames(String data) {
-		ArrayList<String> list = new ArrayList<String>();
+	private static List<String> parseGames(String data) {
+		List<String> list = new ArrayList<String>();
 		while(data.contains("\"name\":\"")) {
 			data = data.substring(data.indexOf("\"name\":\"") + 8);
 			list.add(data.substring(0, data.indexOf("\"")));
 		}
 		return list;
+	}
+	
+	private static int pages = Integer.MAX_VALUE;
+	
+	static List<String> getSearchGames() {
+		List<String> list = new ArrayList<String>();
+		for (int p = 1; p <= pages; p++) {
+			list.addAll(parseSearch(downloadSearchList(OS.ANY, Category.MULTI, p)));
+		}
+		return list;
+	}
+	
+	private static String downloadSearchList(OS os, Category cat, int page) {
+		StringBuffer strbuff = new StringBuffer();
+		try {
+			URL url = new URL("http://store.steampowered.com/search/?os=" + os.getId() + "&category1=998&category2=" + cat.getId()
+			                  + "&sort_by=Name&sort_order=ASC&page=" + page);
+			InputStream input = new BufferedInputStream(url.openConnection().getInputStream());
+			byte data[] = new byte[1024];
+			int count;
+			while ((count = input.read(data)) != -1) {
+				strbuff.append(new String(data, 0, count));
+			}
+			input.close();
+		} catch (IOException e) {
+			return null;
+		}
+		return strbuff.toString().replaceAll("\r\n", "\n");
+	}
+	
+	private static List<String> parseSearch(String data) {
+		if (pages == Integer.MAX_VALUE) {
+			String pagesSnippet = data.substring(data.indexOf("&nbsp;<"), data.indexOf(">&gt;&gt;<"));
+			pages = Integer.parseInt(pagesSnippet.substring(pagesSnippet.indexOf("&page=") + 6, pagesSnippet.indexOf("\" ")));
+		}
+		List<String> list = new ArrayList<String>();
+		while(data.contains("<h4>")) {
+			data = data.substring(data.indexOf("<h4>") + 4);
+			list.add(data.substring(0, data.indexOf("</h4>")));
+		}
+		return list;
+	}
+	
+	private enum OS {
+		ANY("", "Any OS"),
+		LINUX("linux", "Linux"),
+		MAC("mac", "Mac"),
+		WIN("win", "Windows"),
+		STEAMPLAY("steamplay", "Steam Play");
+		
+		private String id;
+		private String name;
+		
+		private OS(String id, String name) {
+			this.id = id;
+			this.name = name;
+		}
+		
+		private String getId() {
+			return id;
+		}
+		
+		private String getName() {
+			return name;
+		}
+	}
+	
+	private enum Category {
+		ANY(0, "Any"),
+		MULTI(1, "Multi-player"),
+		COOP(9, "Co-op"),
+		CROSS_MULTI(27, "Cross-Platform Multiplayer");
+		
+		private int id;
+		private String name;
+		
+		private Category(int id, String name) {
+			this.id = id;
+			this.name = name;
+		}
+		
+		private int getId() {
+			return id;
+		}
+		
+		private String getName() {
+			return name;
+		}
 	}
 }
