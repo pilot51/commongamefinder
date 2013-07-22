@@ -27,6 +27,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -36,7 +37,9 @@ public class Main extends JFrame implements ActionListener {
 	private final Container pane = getContentPane(),
 	                        nameFields = new Container();
 	private final JButton btnAddUser = new JButton("Add user"),
-			              btnFindGames = new JButton("Match games");
+	                      btnFindGames = new JButton("Match games");
+	private final JComboBox<SteamHandler.OS> selectOs = new JComboBox<SteamHandler.OS>(SteamHandler.OS.values());
+	private final JComboBox<SteamHandler.Category> selectCat = new JComboBox<SteamHandler.Category>(SteamHandler.Category.values());
 	private final JLabel gameListHeader = new JLabel("Matched games:");
 	private final JList<String> gameList = new JList<String>();
 	private final List<User> users = new ArrayList<User>();
@@ -63,6 +66,9 @@ public class Main extends JFrame implements ActionListener {
 		btnAddUser.addActionListener(this);
 		pane.add(btnAddUser);
 		pane.add(Box.createVerticalStrut(10));
+		pane.add(selectOs);
+		pane.add(selectCat);
+		pane.add(Box.createVerticalStrut(10));
 		btnFindGames.setAlignmentX(Component.CENTER_ALIGNMENT);
 		btnFindGames.addActionListener(this);
 		pane.add(btnFindGames);
@@ -74,7 +80,7 @@ public class Main extends JFrame implements ActionListener {
 		pane.add(gameList);
 		pack();
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnAddUser) {
@@ -130,9 +136,13 @@ public class Main extends JFrame implements ActionListener {
 				}
 			}
 		}
-		List<String> searchGames = SteamHandler.getSearchGames();
-		for (int i = matchedGames.size() - 1; i >= 0; i--) {
-			if (!searchGames.contains(matchedGames.get(i))) matchedGames.remove(i);
+		SteamHandler.OS selectedOs = (SteamHandler.OS)selectOs.getSelectedItem();
+		SteamHandler.Category selectedCat = (SteamHandler.Category)selectCat.getSelectedItem();
+		if (selectedOs != SteamHandler.OS.ANY || selectedCat != SteamHandler.Category.ANY) {
+			List<String> searchGames = SteamHandler.getSearchGames(selectedOs, selectedCat);
+			for (int i = matchedGames.size() - 1; i >= 0; i--) {
+				if (!searchGames.contains(matchedGames.get(i))) matchedGames.remove(i);
+			}
 		}
 		return matchedGames;
 	}

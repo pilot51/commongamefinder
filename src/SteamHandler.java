@@ -52,18 +52,17 @@ public class SteamHandler {
 		return list;
 	}
 	
-	private static final List<String> SEARCH_CACHE = new ArrayList<String>();
-	private static int pages = Integer.MAX_VALUE;
+	private static int pages;
 	
-	static List<String> getSearchGames() {
-		List<String> list = new ArrayList<String>();
-		if (SEARCH_CACHE.isEmpty()) {
-			for (int p = 1; p <= pages; p++) {
-				list.addAll(parseSearch(downloadSearchList(OS.ANY, Category.MULTI, p)));
+	static List<String> getSearchGames(OS os, Category cat) {
+		List<String> list = SearchCache.getGames(os, cat);
+		if (list == null) {
+			list = new ArrayList<String>();
+			pages = 0;
+			for (int p = 1; p <= pages || pages == 0; p++) {
+				list.addAll(parseSearch(downloadSearchList(os, cat, p)));
 			}
-			SEARCH_CACHE.addAll(list);
-		} else {
-			list.addAll(SEARCH_CACHE);
+			SearchCache.add(os, cat, list);
 		}
 		return list;
 	}
@@ -87,7 +86,7 @@ public class SteamHandler {
 	}
 	
 	private static List<String> parseSearch(String data) {
-		if (pages == Integer.MAX_VALUE) {
+		if (pages == 0) {
 			String pagesSnippet = data.substring(data.indexOf("&nbsp;<"), data.indexOf(">&gt;&gt;<"));
 			pages = Integer.parseInt(pagesSnippet.substring(pagesSnippet.indexOf("&page=") + 6, pagesSnippet.indexOf("\" ")));
 		}
@@ -99,7 +98,7 @@ public class SteamHandler {
 		return list;
 	}
 	
-	private enum OS {
+	enum OS {
 		ANY("", "Any OS"),
 		LINUX("linux", "Linux"),
 		MAC("mac", "Mac"),
@@ -118,13 +117,14 @@ public class SteamHandler {
 			return id;
 		}
 		
-		private String getName() {
+		@Override
+		public String toString() {
 			return name;
 		}
 	}
 	
-	private enum Category {
-		ANY(0, "Any"),
+	enum Category {
+		ANY(0, "Any category"),
 		MULTI(1, "Multi-player"),
 		COOP(9, "Co-op"),
 		CROSS_MULTI(27, "Cross-Platform Multiplayer");
@@ -141,8 +141,35 @@ public class SteamHandler {
 			return id;
 		}
 		
-		private String getName() {
+		@Override
+		public String toString() {
 			return name;
+		}
+	}
+	
+	private static class SearchCache {
+		private static final List<SearchCache> CACHES = new ArrayList<SearchCache>();
+		private OS os;
+		private Category category;
+		private List<String> games;
+		
+		private SearchCache(OS os, Category category, List<String> games) {
+			this.os = os;
+			this.category = category;
+			this.games = games;
+		}
+		
+		private static void add(OS os, Category category, List<String> games) {
+			CACHES.add(new SearchCache(os, category, games));
+		}
+		
+		private static List<String> getGames(OS os, Category cat) {
+			for (SearchCache c : CACHES) {
+				if (c.os == os && c.category == cat) {
+					return c.games;
+				}
+			}
+			return null;
 		}
 	}
 }
