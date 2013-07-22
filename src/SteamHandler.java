@@ -87,8 +87,9 @@ public class SteamHandler {
 	
 	private static List<String> parseSearch(String data) {
 		if (pages == 0) {
-			String pagesSnippet = data.substring(data.indexOf("&nbsp;<"), data.indexOf(">&gt;&gt;<"));
-			pages = Integer.parseInt(pagesSnippet.substring(pagesSnippet.indexOf("&page=") + 6, pagesSnippet.indexOf("\" ")));
+			int pagePointer = data.lastIndexOf("&nbsp;...&nbsp;");
+			if (pagePointer == -1) pagePointer = data.lastIndexOf("&nbsp;|&nbsp;");
+			pages = Integer.parseInt(data.substring(data.indexOf(">", pagePointer) + 1, data.indexOf("</a>", pagePointer)));
 		}
 		List<String> list = new ArrayList<String>();
 		while(data.contains("<h4>")) {
