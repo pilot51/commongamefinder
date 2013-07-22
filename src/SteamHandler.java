@@ -52,12 +52,18 @@ public class SteamHandler {
 		return list;
 	}
 	
+	private static final List<String> SEARCH_CACHE = new ArrayList<String>();
 	private static int pages = Integer.MAX_VALUE;
 	
 	static List<String> getSearchGames() {
 		List<String> list = new ArrayList<String>();
-		for (int p = 1; p <= pages; p++) {
-			list.addAll(parseSearch(downloadSearchList(OS.ANY, Category.MULTI, p)));
+		if (SEARCH_CACHE.isEmpty()) {
+			for (int p = 1; p <= pages; p++) {
+				list.addAll(parseSearch(downloadSearchList(OS.ANY, Category.MULTI, p)));
+			}
+			SEARCH_CACHE.addAll(list);
+		} else {
+			list.addAll(SEARCH_CACHE);
 		}
 		return list;
 	}

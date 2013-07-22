@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
+	static final List<User> CACHE = new ArrayList<User>();
 	private String name;
 	private List<String> games;
 	
 	User(String name, List<String> games) {
 		this.name = name;
 		this.games = games;
+		CACHE.add(this);
 	}
 	
 	String getName() {
