@@ -87,9 +87,11 @@ public class SteamHandler {
 	
 	private static List<String> parseSearch(String data) {
 		if (pages == 0) {
-			int pagePointer = data.lastIndexOf("&nbsp;...&nbsp;");
-			if (pagePointer == -1) pagePointer = data.lastIndexOf("&nbsp;|&nbsp;");
-			pages = Integer.parseInt(data.substring(data.indexOf(">", pagePointer) + 1, data.indexOf("</a>", pagePointer)));
+			if (data.contains("&gt;&gt;")) {
+				int pagePointer = data.lastIndexOf("&nbsp;...&nbsp;");
+				if (pagePointer == -1) pagePointer = data.lastIndexOf("&nbsp;|&nbsp;");
+				pages = Integer.parseInt(data.substring(data.indexOf(">", pagePointer) + 1, data.indexOf("</a>", pagePointer)));
+			} else pages = 1;
 		}
 		List<String> list = new ArrayList<String>();
 		while(data.contains("<h4>")) {
