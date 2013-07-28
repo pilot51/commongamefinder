@@ -16,6 +16,7 @@
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -24,10 +25,11 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JComboBox;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -42,6 +44,7 @@ public class Main extends JFrame implements ActionListener {
 	private final JComboBox<SteamHandler.Category> selectCat = new JComboBox<SteamHandler.Category>(SteamHandler.Category.values());
 	private final JLabel gameListHeader = new JLabel("Matched games:");
 	private final JList<String> gameList = new JList<String>();
+	private final JScrollPane gameListPane = new JScrollPane(gameList);
 	private final List<User> users = new ArrayList<User>();
 	private List<String> games;
 	
@@ -66,7 +69,9 @@ public class Main extends JFrame implements ActionListener {
 		btnAddUser.addActionListener(this);
 		pane.add(btnAddUser);
 		pane.add(Box.createVerticalStrut(10));
+		selectOs.setMaximumSize(selectOs.getPreferredSize());
 		pane.add(selectOs);
+		selectCat.setMaximumSize(selectCat.getPreferredSize());
 		pane.add(selectCat);
 		pane.add(Box.createVerticalStrut(10));
 		btnFindGames.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -76,8 +81,8 @@ public class Main extends JFrame implements ActionListener {
 		gameListHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
 		gameListHeader.setVisible(false);
 		pane.add(gameListHeader);
-		gameList.setVisible(false);
-		pane.add(gameList);
+		gameListPane.setVisible(false);
+		pane.add(gameListPane);
 		pack();
 	}
 	
@@ -110,10 +115,10 @@ public class Main extends JFrame implements ActionListener {
 			if (games != null && !games.isEmpty()) {
 				gameList.setListData(games.toArray(new String[games.size()]));
 				gameListHeader.setVisible(true);
-				gameList.setVisible(true);
+				gameListPane.setVisible(true);
 			} else {
 				gameListHeader.setVisible(false);
-				gameList.setVisible(false);
+				gameListPane.setVisible(false);
 			}
 			pack();
 		}
@@ -122,6 +127,7 @@ public class Main extends JFrame implements ActionListener {
 	private void addNameField() {
 		JTextField field = new JTextField(8);
 		field.setAlignmentX(Component.CENTER_ALIGNMENT);
+		field.setMaximumSize(new Dimension(520, field.getPreferredSize().height));
 		nameFields.add(field);
 	}
 	
